@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Secret Message Feed</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🔐 Secret Message Feed</h1>
+
+        <section class="card">
+
+            <h2>Send a Message</h2>
+
+            <textarea
+                id="message"
+                placeholder="Enter your message..."
+            ></textarea>
+
+            <input
+                id="key"
+                type="password"
+                placeholder="Enter secret key"
+            >
+
+            <button onclick="sendMessage()">
+                Encrypt & Publish
+            </button>
+
+            <p id="status"></p>
+
+        </section>
+
+
+        <section class="card">
+
+            <h2>Public Feed</h2>
+
+            <div id="feed">
+                Loading messages...
+            </div>
+
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
