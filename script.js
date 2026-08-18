@@ -1,3 +1,97 @@
+function vigenereEncrypt(text, key) {
+
+    key = key.toUpperCase().replace(/[^A-Z]/g, "");
+
+    if (!key) {
+        throw new Error("Key must contain letters.");
+    }
+
+    let result = "";
+    let keyIndex = 0;
+
+    for (const char of text) {
+
+        const code = char.charCodeAt(0);
+
+        if (code >= 65 && code <= 90) {
+
+            const shift =
+                key.charCodeAt(keyIndex % key.length) - 65;
+
+            result += String.fromCharCode(
+                ((code - 65 + shift) % 26) + 65
+            );
+
+            keyIndex++;
+
+        } else if (code >= 97 && code <= 122) {
+
+            const shift =
+                key.charCodeAt(keyIndex % key.length) - 65;
+
+            result += String.fromCharCode(
+                ((code - 97 + shift) % 26) + 97
+            );
+
+            keyIndex++;
+
+        } else {
+
+            result += char;
+        }
+    }
+
+    return result;
+}
+
+
+function vigenereDecrypt(text, key) {
+
+    key = key.toUpperCase().replace(/[^A-Z]/g, "");
+
+    if (!key) {
+        throw new Error("Key must contain letters.");
+    }
+
+    let result = "";
+    let keyIndex = 0;
+
+    for (const char of text) {
+
+        const code = char.charCodeAt(0);
+
+        if (code >= 65 && code <= 90) {
+
+            const shift =
+                key.charCodeAt(keyIndex % key.length) - 65;
+
+            result += String.fromCharCode(
+                ((code - 65 - shift + 26) % 26) + 65
+            );
+
+            keyIndex++;
+
+        } else if (code >= 97 && code <= 122) {
+
+            const shift =
+                key.charCodeAt(keyIndex % key.length) - 65;
+
+            result += String.fromCharCode(
+                ((code - 97 - shift + 26) % 26) + 97
+            );
+
+            keyIndex++;
+
+        } else {
+
+            result += char;
+        }
+    }
+
+    return result;
+}
+
+
 async function sendMessage() {
 
     const message =
@@ -10,6 +104,7 @@ async function sendMessage() {
         document.getElementById("status");
 
     if (!message || !key) {
+
         status.textContent =
             "Please enter a message and secret key.";
 
@@ -21,21 +116,24 @@ async function sendMessage() {
         const ciphertext =
             vigenereEncrypt(message, key);
 
-        const response = await fetch("/api/messages", {
-            method: "POST",
+        const response =
+            await fetch("/api/messages", {
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+                method: "POST",
 
-            body: JSON.stringify({
-                ciphertext: ciphertext,
-                plaintext: message,
-                key: key
-            })
-        });
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-        const result = await response.json();
+                body: JSON.stringify({
+                    ciphertext: ciphertext,
+                    plaintext: message,
+                    key: key
+                })
+            });
+
+        const result =
+            await response.json();
 
         if (!result.success) {
             throw new Error(result.error);
@@ -53,7 +151,6 @@ async function sendMessage() {
 
         status.textContent =
             "Error: " + error.message;
-
     }
 }
 
@@ -119,7 +216,6 @@ async function loadMessages() {
 
                     output.textContent =
                         "Invalid key.";
-
                 }
             };
 
@@ -130,14 +226,14 @@ async function loadMessages() {
 
         feed.textContent =
             "Unable to load messages.";
-
     }
 }
 
 
 function escapeHTML(text) {
 
-    const div = document.createElement("div");
+    const div =
+        document.createElement("div");
 
     div.textContent = text;
 
