@@ -7,7 +7,106 @@
 
     <title>Secret Message Feed</title>
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111827;
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: #1f2937;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        textarea,
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            margin-top: 8px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        #status {
+            color: #4ade80;
+        }
+
+        .message {
+            background: #111827;
+            padding: 18px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        .timestamp {
+            color: #9ca3af;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .ciphertext {
+            font-family: monospace;
+            font-size: 18px;
+            word-break: break-word;
+            margin-bottom: 12px;
+            color: #60a5fa;
+        }
+
+        .decrypted {
+            margin-top: 12px;
+            color: #4ade80;
+            font-weight: bold;
+            word-break: break-word;
+        }
+
+        .error {
+            color: #f87171;
+        }
+    </style>
 </head>
 
 <body>
@@ -15,6 +114,9 @@
     <div class="container">
 
         <h1>🔐 Secret Message Feed</h1>
+
+
+        <!-- SEND MESSAGE -->
 
         <section class="card">
 
@@ -40,6 +142,8 @@
         </section>
 
 
+        <!-- PUBLIC FEED -->
+
         <section class="card">
 
             <h2>Public Feed</h2>
@@ -52,7 +156,496 @@
 
     </div>
 
-    <script src="script.js"></script>
+
+    <script>
+
+        /*
+         * =====================================================
+         * GOOGLE APPS SCRIPT URL
+         * =====================================================
+         *
+         * Replace the URL below with your Apps Script Web App
+         * URL. It should end with /exec
+         *
+         */
+
+        const APPS_SCRIPT_URL =
+            "https://script.google.com/macros/s/AKfycbzMC46IjeGNbNJe39irRb2SuZ5_fNFY0dbyyvxU9aGZ4XHX3v7pofuUe92009GBsxKp/exec";
+
+
+        /*
+         * =====================================================
+         * VIGENERE ENCRYPTION
+         * =====================================================
+         */
+
+        function vigenereEncrypt(text, key) {
+
+            key = key
+                .toUpperCase()
+                .replace(/[^A-Z]/g, "");
+
+            if (!key) {
+                throw new Error(
+                    "Secret key must contain letters."
+                );
+            }
+
+            let result = "";
+            let keyIndex = 0;
+
+            for (const char of text) {
+
+                const code = char.charCodeAt(0);
+
+
+                // Uppercase letter
+
+                if (code >= 65 && code <= 90) {
+
+                    const shift =
+                        key.charCodeAt(
+                            keyIndex % key.length
+                        ) - 65;
+
+                    result += String.fromCharCode(
+                        ((code - 65 + shift) % 26) + 65
+                    );
+
+                    keyIndex++;
+                }
+
+
+                // Lowercase letter
+
+                else if (code >= 97 && code <= 122) {
+
+                    const shift =
+                        key.charCodeAt(
+                            keyIndex % key.length
+                        ) - 65;
+
+                    result += String.fromCharCode(
+                        ((code - 97 + shift) % 26) + 97
+                    );
+
+                    keyIndex++;
+                }
+
+
+                // Space / number / punctuation
+
+                else {
+
+                    result += char;
+                }
+            }
+
+            return result;
+        }
+
+
+        /*
+         * =====================================================
+         * VIGENERE DECRYPTION
+         * =====================================================
+         */
+
+        function vigenereDecrypt(text, key) {
+
+            key = key
+                .toUpperCase()
+                .replace(/[^A-Z]/g, "");
+
+            if (!key) {
+                throw new Error(
+                    "Secret key must contain letters."
+                );
+            }
+
+            let result = "";
+            let keyIndex = 0;
+
+            for (const char of text) {
+
+                const code = char.charCodeAt(0);
+
+
+                // Uppercase letter
+
+                if (code >= 65 && code <= 90) {
+
+                    const shift =
+                        key.charCodeAt(
+                            keyIndex % key.length
+                        ) - 65;
+
+                    result += String.fromCharCode(
+                        ((code - 65 - shift + 26) % 26) + 65
+                    );
+
+                    keyIndex++;
+                }
+
+
+                // Lowercase letter
+
+                else if (code >= 97 && code <= 122) {
+
+                    const shift =
+                        key.charCodeAt(
+                            keyIndex % key.length
+                        ) - 65;
+
+                    result += String.fromCharCode(
+                        ((code - 97 - shift + 26) % 26) + 97
+                    );
+
+                    keyIndex++;
+                }
+
+
+                // Space / number / punctuation
+
+                else {
+
+                    result += char;
+                }
+            }
+
+            return result;
+        }
+
+
+        /*
+         * =====================================================
+         * SEND MESSAGE
+         * =====================================================
+         */
+
+        async function sendMessage() {
+
+            const message =
+                document
+                    .getElementById("message")
+                    .value
+                    .trim();
+
+            const key =
+                document
+                    .getElementById("key")
+                    .value
+                    .trim();
+
+            const status =
+                document.getElementById("status");
+
+
+            if (!message || !key) {
+
+                status.className = "error";
+
+                status.textContent =
+                    "Please enter a message and secret key.";
+
+                return;
+            }
+
+
+            try {
+
+                status.className = "";
+
+                status.textContent =
+                    "Encrypting message...";
+
+
+                // Encrypt the message
+
+                const ciphertext =
+                    vigenereEncrypt(
+                        message,
+                        key
+                    );
+
+
+                // Send to Google Apps Script
+
+                const response =
+                    await fetch(
+                        APPS_SCRIPT_URL,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "text/plain;charset=utf-8"
+                            },
+
+                            body: JSON.stringify({
+
+                                ciphertext:
+                                    ciphertext,
+
+                                plaintext:
+                                    message,
+
+                                key:
+                                    key
+                            })
+                        }
+                    );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!result.success) {
+
+                    throw new Error(
+                        result.error ||
+                        "Unable to save message."
+                    );
+                }
+
+
+                status.textContent =
+                    "✅ Message encrypted and published!";
+
+
+                // Clear inputs
+
+                document
+                    .getElementById("message")
+                    .value = "";
+
+                document
+                    .getElementById("key")
+                    .value = "";
+
+
+                // Reload feed
+
+                loadMessages();
+
+            }
+
+            catch (error) {
+
+                status.className = "error";
+
+                status.textContent =
+                    "Error: " +
+                    error.message;
+            }
+        }
+
+
+        /*
+         * =====================================================
+         * LOAD PUBLIC MESSAGES
+         * =====================================================
+         */
+
+        async function loadMessages() {
+
+            const feed =
+                document.getElementById("feed");
+
+
+            try {
+
+                feed.innerHTML =
+                    "Loading messages...";
+
+
+                const response =
+                    await fetch(
+                        APPS_SCRIPT_URL
+                    );
+
+
+                const result =
+                    await response.json();
+
+
+                if (!result.success) {
+
+                    throw new Error(
+                        result.error ||
+                        "Unable to load messages."
+                    );
+                }
+
+
+                feed.innerHTML = "";
+
+
+                if (
+                    !result.messages ||
+                    result.messages.length === 0
+                ) {
+
+                    feed.innerHTML =
+                        "<p>No messages yet.</p>";
+
+                    return;
+                }
+
+
+                // Show newest messages first
+
+                result.messages
+                    .reverse()
+                    .forEach(message => {
+
+                        createMessageElement(
+                            message,
+                            feed
+                        );
+                    });
+
+            }
+
+            catch (error) {
+
+                feed.innerHTML =
+                    `<p class="error">
+                        Unable to load messages.<br>
+                        ${escapeHTML(error.message)}
+                    </p>`;
+            }
+        }
+
+
+        /*
+         * =====================================================
+         * CREATE MESSAGE CARD
+         * =====================================================
+         */
+
+        function createMessageElement(
+            message,
+            feed
+        ) {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "message";
+
+
+            const timestamp =
+                document.createElement("div");
+
+            timestamp.className =
+                "timestamp";
+
+            timestamp.textContent =
+                "Posted: " +
+                message.timestamp;
+
+
+            const ciphertext =
+                document.createElement("div");
+
+            ciphertext.className =
+                "ciphertext";
+
+            ciphertext.textContent =
+                message.ciphertext;
+
+
+            const keyInput =
+                document.createElement("input");
+
+            keyInput.type =
+                "password";
+
+            keyInput.placeholder =
+                "Enter secret key to decrypt";
+
+
+            const button =
+                document.createElement("button");
+
+            button.textContent =
+                "Decrypt";
+
+
+            const output =
+                document.createElement("div");
+
+            output.className =
+                "decrypted";
+
+
+            button.onclick = function () {
+
+                try {
+
+                    const decrypted =
+                        vigenereDecrypt(
+                            message.ciphertext,
+                            keyInput.value
+                        );
+
+                    output.textContent =
+                        "🔓 " + decrypted;
+
+                }
+
+                catch (error) {
+
+                    output.textContent =
+                        "❌ Invalid key.";
+                }
+            };
+
+
+            item.appendChild(timestamp);
+
+            item.appendChild(ciphertext);
+
+            item.appendChild(keyInput);
+
+            item.appendChild(button);
+
+            item.appendChild(output);
+
+            feed.appendChild(item);
+        }
+
+
+        /*
+         * =====================================================
+         * SECURITY
+         * =====================================================
+         */
+
+        function escapeHTML(text) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                text;
+
+            return div.innerHTML;
+        }
+
+
+        /*
+         * =====================================================
+         * START APPLICATION
+         * =====================================================
+         */
+
+        loadMessages();
+
+    </script>
 
 </body>
 
